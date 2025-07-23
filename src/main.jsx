@@ -7,12 +7,17 @@ import MyFooter from './components/MyFooter'
 import Welcome from './components/Welcome'
 import AllTheBooks from './components/AllTheBooks'
 
+
+
+
 createRoot(document.getElementById('root')).render(
     <>
     
 <MyNavBar/>
 <Welcome/>
-<AllTheBooks/>
+{/* <AllTheBooks/> */}
+
+<App/>
 <MyFooter/>
 
 
