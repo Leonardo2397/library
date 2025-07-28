@@ -53,18 +53,34 @@ class CommentArea extends Component {
        });
       };
 
-      componentDidMount() {
-        console.log("componentdidmount chiamato");
-        this.fetchComments(); //recupera i dati iniziali
-      }
+//       componentDidMount() {
+//         console.log("componentdidmount chiamato");
+//         this.fetchComments(); //recupera i dati iniziali
+//       }
 
-  // cambia il valore asin selezionando un altro libro
-  componentDidUpdate(prevProps) {
-    if (prevProps.asin !== this.props.asin) {
-    console.log ("asin cambiato", prevProps.asin,   this.props.asin);
-     this.fetchComments(); //ricarico commenti per nuovo asin
+//   // cambia il valore asin selezionando un altro libro
+//   componentDidUpdate(prevProps) {
+//     if (prevProps.asin !== this.props.asin) {
+//     console.log ("asin cambiato", prevProps.asin,   this.props.asin);
+//      this.fetchComments(); //ricarico commenti per nuovo asin
+//   }
+// }
+
+componentDidMount() {
+  if (this.props.asin) {
+    console.log("componentDidMount chiamato con asin:", this.props.asin);
+    this.fetchComments();
   }
 }
+
+componentDidUpdate(prevProps) {
+  if (prevProps.asin !== this.props.asin && this.props.asin) {
+    console.log("asin cambiato da", prevProps.asin, "a", this.props.asin);
+    this.fetchComments();
+  }
+}
+
+
 
 render() {
     const {comments, isLoading, error} = this.state;
