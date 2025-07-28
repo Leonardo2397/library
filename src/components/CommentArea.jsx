@@ -69,7 +69,7 @@ class CommentArea extends Component {
 componentDidMount() {
   if (this.props.asin) {
     console.log("componentDidMount chiamato con asin:", this.props.asin);
-    this.fetchComments();
+    this.fetchComments(); // carico i commenti se asin è valido
   }
 }
 
@@ -77,7 +77,7 @@ componentDidUpdate(prevProps) {
   if (prevProps.asin !== this.props.asin && this.props.asin) {
     console.log("asin cambiato da", prevProps.asin, "a", this.props.asin);
     this.fetchComments();
-  }
+  } // se asin cambia ricarico i commenti
 }
 
 
