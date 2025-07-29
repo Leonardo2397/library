@@ -1,108 +1,79 @@
-import React, { Component } from "react";
+import React, { useState, useEffect } from "react";
 import { Spinner, Alert } from "react-bootstrap";
 import CommentList from "./CommentList";
 import AddComment from "./AddComment";
 
-class CommentArea extends Component {
-    constructor(props) {
-        super(props);
+const CommentArea = ({ asin }) => {
+  // stato iniziale del componente
+  const [comments, setComments] = useState([]);      // lista commenti ricevuti
+  const [isLoading, setIsLoading] = useState(true);  // spinner di caricamento
+  const [error, setError] = useState(null);          // eventuali errori fetch
 
+  console.log("CommentArea montato con asin", asin);
 
-        //stato iniziale componente
-        this.state={
-            comments: [],  // lista commenti ricevuti
-            isLoading: true, // spinner di caricamento
-            error: null,   // eventuali errori fetch
-        };
-    
-        console.log("CommentArea montato conasin", this.props.asin);
-    }
-      // recuperare i commenti da api
-      fetchComments = () => {
-        const { asin } = this.props;
+  // recupera i commenti dall'API
+  const fetchComments = () => {
+    console.log("Inizio fetch commenti per asin:", asin);
 
-        console.log(" Inizio fetch commenti per asin:", asin);
-             
-            //reset loading e errori
-             this.setState({ isLoading: true, error: null });
+    // reset stato iniziale prima della chiamata
+    setIsLoading(true);
+    setError(null);
 
-            //chiamata fetch con autorizzazione
-           fetch(`https://striveschool-api.herokuapp.com/api/comments/${asin}`, {
+    // chiamata fetch con autorizzazione
+    fetch(`https://striveschool-api.herokuapp.com/api/comments/${asin}`, {
       headers: {
         Authorization:
           "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2ODcwYjkzMTc4Y2RkZjAwMTU1ZDY3OWEiLCJpYXQiOjE3NTMzNTQyMTksImV4cCI6MTc1NDU2MzgxOX0.5FGAMHp9aTH_49GqwVABtjYeo5FC4gV_Iwf8gTotc9o",
       },
     })
-
-       .then((response) => {
-            console.log(" Risposta ricevuta:", response.status);
-            if(!response.ok) {
-                throw new Error ("errore recuper commenti")
-            }
-            return response.json(); //converto in json
-       })
-       .then((data) => {
-        console.log("commenti ricevuti", data);
+      .then((response) => {
+        console.log("Risposta ricevuta:", response.status);
+        if (!response.ok) {
+          throw new Error("Errore recupero commenti");
+        }
+        return response.json(); // converto la risposta in JSON
+      })
+      .then((data) => {
+        console.log("Commenti ricevuti", data);
         // salvo i commenti nello stato e nascondo lo spinner
-        this.setState ({comments: data, isLoading: false});
-       })
-       .catch((err)=> {
-        console.error("errore nella fetch dei commenti", err)
-        //salvo errore nello stato per mostrarlo su schermo
-        this.setState({error: err.message, isLoading: false});
-       });
-      };
+        setComments(data);
+        setIsLoading(false);
+      })
+      .catch((err) => {
+        console.error("Errore nella fetch dei commenti", err);
+        // salvo errore nello stato per mostrarlo a schermo
+        setError(err.message);
+        setIsLoading(false);
+      });
+  };
 
-//       componentDidMount() {
-//         console.log("componentdidmount chiamato");
-//         this.fetchComments(); //recupera i dati iniziali
-//       }
+  // useEffect si comporta come componentDidMount + componentDidUpdate per asin
+  useEffect(() => {
+    if (asin) {
+      console.log("useEffect attivato con asin:", asin);
+      fetchComments(); // carico i commenti se asin è valido
+    }
+  }, [asin]); // effetto si attiva solo se asin cambia
 
-//   // cambia il valore asin selezionando un altro libro
-//   componentDidUpdate(prevProps) {
-//     if (prevProps.asin !== this.props.asin) {
-//     console.log ("asin cambiato", prevProps.asin,   this.props.asin);
-//      this.fetchComments(); //ricarico commenti per nuovo asin
-//   }
-// }
+  console.log("stato corrente", { comments, isLoading, error });
 
-componentDidMount() {
-  if (this.props.asin) {
-    console.log("componentDidMount chiamato con asin:", this.props.asin);
-    this.fetchComments(); // carico i commenti se asin è valido
-  }
-}
+  return (
+    <div className="mt-3">
+      {/* Spinner se stiamo caricando */}
+      {isLoading && <Spinner animation="border" />}
 
-componentDidUpdate(prevProps) {
-  if (prevProps.asin !== this.props.asin && this.props.asin) {
-    console.log("asin cambiato da", prevProps.asin, "a", this.props.asin);
-    this.fetchComments();
-  } // se asin cambia ricarico i commenti
-}
+      {/* Messaggio d'errore se c'è stato un problema */}
+      {error && <Alert variant="danger">{error}</Alert>}
 
+      {/* Se tutto è andato bene, mostra i commenti e il form */}
+      {!isLoading && !error && (
+        <>
+          <CommentList comments={comments} />
+          <AddComment asin={asin} onCommentAdded={fetchComments} />
+        </>
+      )}
+    </div>
+  );
+};
 
-
-render() {
-    const {comments, isLoading, error} = this.state;
-    console.log("stato corrente", this.state)
-
- return (
-      <div className="mt-3">
-        {/* Spinner se stiamo caricando */}
-        {isLoading && <Spinner animation="border" />}
-
-         {/* Messaggio d'errore se c'è stato un problema  */}
-        {error && <Alert variant="danger">{error}</Alert>}
-
-        {/* Se tutto è andato bene, mostra i commenti e il form */}
-        {!isLoading && !error && (
-          <>
-            <CommentList comments={comments} />
-            <AddComment asin={this.props.asin} onCommentAdded={this.fetchComments} />
-          </>
-        )}
-      </div>
-    );
-  }
-}
- export default CommentArea;
+export default CommentArea;
