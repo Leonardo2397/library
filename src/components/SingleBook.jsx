@@ -8,6 +8,7 @@ const SingleBook = ({ book, selected, onClick }) => {
   return (
     <div>
       <Card
+      data-testid="single-book-card"
         onClick={onClick}
         style={{
           cursor: "pointer",
